@@ -1,17 +1,14 @@
 const { TextDecoder } = require('util');
-const { EventEmitter } = require('events');
 const { OPEN: WS_OPEN } = require('ws');
 
-const { STATUS } = require('../utils/Constants');
+const { STATUS, EVENTS } = require('../utils/Constants');
 
-class BaseWebSocket extends EventEmitter {
+class BaseWebSocket {
   /**
    * @param {import('../structures/Connection')} connectionManager
    * @param {object} options
    */
   constructor(connectionManager, options = {}) {
-    super();
-
     /**
      * @type {?WebSocket}
      */
@@ -42,10 +39,23 @@ class BaseWebSocket extends EventEmitter {
     return this.connectionManager.subscriptions;
   }
 
+  emit(...args) {
+    this.connectionManager.emit(...args);
+  }
+
+  _cleanupConnection() {
+    if (this.connection) {
+      // eslint-disable-next-line no-multi-assign
+      this.connection.onopen = this.connection.onclose = this.connection.onerror = this.connection.onmessage = null;
+    }
+
+    this.connection = null;
+  }
+
   // WS
 
   _send({ t, d, callback } = {}) {
-    if (this.connection && this.connection.readyState !== WS_OPEN) {
+    if (this.connection && this.connection.readyState === WS_OPEN) {
       this.connection.send(BaseWebSocket.pack({ t, d }), err => {
         if (!err && typeof callback === 'function') callback();
       });
@@ -71,7 +81,6 @@ class BaseWebSocket extends EventEmitter {
       const item = this.ratelimit.queue.shift();
 
       if (!item) return;
-
       this._send(item);
       this.ratelimit.remaining--; // eslint-disable-line no-plusplus
     }
@@ -79,13 +88,18 @@ class BaseWebSocket extends EventEmitter {
 
   // WS EVENTS
 
+  onClose() {}
+
   onOpen() {
-    this.status = STATUS.NEARLY;
+    this.status = STATUS.WAITING;
   }
 
-  onError() {}
+  onError(event) {
+    const error = event && event.error ? event.error : event;
 
-  onClose() {}
+    if (!error) return;
+    this.emit(EVENTS.ERROR, error);
+  }
 
   onMessage({ data }) {
     const packet = BaseWebSocket.unpack(data);
