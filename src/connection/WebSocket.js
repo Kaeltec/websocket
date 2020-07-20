@@ -2,7 +2,7 @@ const WS = require('ws');
 
 const BaseWebSocket = require('./BaseWebSocket');
 const PacketHandlers = require('./handlers');
-const { CODES, STATUS } = require('../utils/Constants');
+const { CODES, EVENTS, STATUS } = require('../utils/Constants');
 
 class WebSocket extends BaseWebSocket {
   connect() {
@@ -17,8 +17,21 @@ class WebSocket extends BaseWebSocket {
     ws.onmessage = this.onMessage.bind(this);
   }
 
+  /**
+   * @param {string} topic
+   */
+  joinSubscription(topic) {
+    this.send(CODES.JOIN, { topic });
+  }
+
+  /**
+   * @param {string} topic
+   */
+  leaveSubscription(topic) {
+    this.send(CODES.LEAVE, { topic });
+  }
+
   ping() {
-    console.log('this.send(CODES.PING)');
     this.send(CODES.PING);
   }
 
@@ -27,6 +40,20 @@ class WebSocket extends BaseWebSocket {
     if (packet && PacketHandlers[packet.t]) {
       PacketHandlers[packet.t](this, packet.d);
     }
+  }
+
+  // WS EVENTS
+
+  onClose(event) {
+    this.emit(EVENTS.CLOSE, event);
+
+    for (const subscription of this.subscriptions.values()) {
+      this.leaveSubscription(subscription.topic);
+      subscription.status = STATUS.DISCONNECTED;
+    }
+
+    this._cleanupConnection();
+    this.connect();
   }
 }
 
