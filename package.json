@@ -1,0 +1,49 @@
+{
+  "name": "websocket",
+  "version": "0.0.1b",
+  "license": "AGPL-3.0",
+  "main": "dist/index.js",
+  "module": "dist/index.es.js",
+  "scripts": {
+    "build": "rollup -c",
+    "prebuild": "rimraf dist",
+    "lint": "eslint ./ --ext js",
+    "lint:fix": "eslint ./ --ext js --fix",
+    "prettier": "prettier --check ./**/*.js",
+    "prettier:fix": "prettier --write ./**/*.js"
+  },
+  "homepage": "https://github.com/Kaeltec/websocket#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kaeltec/websocket.git"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "adonis",
+    "nodejs",
+    "websocket",
+    "connection"
+  ],
+  "dependencies": {
+    "ws": "^7.3.1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^14.0.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^8.4.0",
+    "@rollup/plugin-url": "^5.0.1",
+    "eslint": "7.5.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "prettier": "^2.0.5",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.22.1"
+  }
+}
