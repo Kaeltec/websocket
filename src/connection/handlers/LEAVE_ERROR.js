@@ -1,8 +1,10 @@
 /**
  * @param {import('../WebSocket')} ws
  */
-function handle() {
-  console.log('LEAVE_ERROR');
+function handle(ws, data) {
+  const socket = ws.subscriptions.get(data.topic);
+
+  if (socket) socket.leaveError(data);
 }
 
 module.exports = handle;

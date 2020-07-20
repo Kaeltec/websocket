@@ -1,8 +1,10 @@
 /**
  * @param {import('../WebSocket')} ws
  */
-function handle() {
-  console.log('LEAVE_ACK');
+function handle(ws, { topic }) {
+  const socket = ws.subscriptions.get(topic);
+
+  if (socket) socket.leave();
 }
 
 module.exports = handle;
