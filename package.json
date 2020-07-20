@@ -3,7 +3,6 @@
   "version": "0.0.1b",
   "license": "AGPL-3.0",
   "main": "dist/index.js",
-  "module": "dist/index.es.js",
   "scripts": {
     "build": "rollup -c",
     "prebuild": "rimraf dist",
