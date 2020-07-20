@@ -12,17 +12,17 @@ class Subscriptions extends Map {
     return this.getValues[0];
   }
 
-  add(id, ...params) {
-    const newObject = new Socket(...params);
+  add(topic, ...params) {
+    const newSocket = new Socket(...params);
 
-    this.set(id, newObject);
-    return newObject;
+    this.set(topic, newSocket);
+    return newSocket;
   }
 
-  remove(id) {
-    const old = this.get(id);
+  remove(topic) {
+    const old = this.get(topic);
 
-    this.delete(id);
+    this.delete(topic);
     return old;
   }
 

@@ -1,8 +1,6 @@
 /**
  * @param {import('../WebSocket')} ws
  */
-function handle() {
-  console.log('PONG');
-}
+function handle() {}
 
 module.exports = handle;

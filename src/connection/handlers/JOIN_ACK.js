@@ -4,7 +4,7 @@
 function handle(ws, { topic }) {
   const socket = ws.subscriptions.get(topic);
 
-  if (socket) socket.joinAck();
+  if (socket) socket.join();
 }
 
 module.exports = handle;
