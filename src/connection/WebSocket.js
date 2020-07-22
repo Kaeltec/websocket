@@ -17,6 +17,25 @@ class WebSocket extends BaseWebSocket {
     ws.onmessage = this.onMessage.bind(this);
   }
 
+  reconnect() {
+    if (this.reconnectionTimeout) this.reconnectionTimeout = null;
+    if (this.connectionAttempts > this.options.maxConnectionAttempts) {
+      this.status = STATUS.DISCONNECTED;
+      return this.error(new Error('Maximum reconnection attempts achieved!'));
+    }
+
+    if (this.connection) this._cleanupConnection();
+
+    this.debug(`[RECONNECTION]
+  Trying to reconnect to the websocket after a close.
+  Attempts: ${this.connectionAttempts}`);
+
+    ++this.connectionAttempts; // eslint-disable-line no-plusplus
+    this.status = STATUS.RECONNECTING;
+
+    this.connect();
+  }
+
   /**
    * @param {string} topic
    */
@@ -47,13 +66,22 @@ class WebSocket extends BaseWebSocket {
   onClose(event) {
     this.emit(EVENTS.CLOSE, event);
 
+    this.debug(`[CLOSE]
+  Code   : ${event.code}
+  Clean  : ${event.wasClean}
+  Reason : ${event.reason || 'No reason received'}`);
+
     for (const subscription of this.subscriptions.values()) {
       this.leaveSubscription(subscription.topic);
       subscription.status = STATUS.DISCONNECTED;
     }
 
     this._cleanupConnection();
-    this.connect();
+
+    this.reconnectionTimeout = setTimeout(
+      () => this.reconnect(),
+      this.options.reconnectionTimeout * this.connectionAttempts,
+    );
   }
 }
 
