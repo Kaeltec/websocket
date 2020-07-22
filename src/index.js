@@ -6,5 +6,6 @@ module.exports = {
   Socket: require('./structures/Socket'),
   Connection: require('./structures/Connection'),
 
+  Util: require('./utils'),
   Constants: require('./utils/Constants'),
 };
