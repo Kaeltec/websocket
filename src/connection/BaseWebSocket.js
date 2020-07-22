@@ -1,6 +1,7 @@
 const { TextDecoder } = require('util');
 const { OPEN: WS_OPEN } = require('ws');
 
+const { mergeObject } = require('../utils');
 const { STATUS, EVENTS } = require('../utils/Constants');
 
 class BaseWebSocket {
@@ -9,6 +10,19 @@ class BaseWebSocket {
    * @param {object} options
    */
   constructor(connectionManager, options = {}) {
+    options = mergeObject(
+      {
+        path: 'adonis-ws',
+        maxConnectionAttempts: 10,
+        reconnectionTimeout: 10000,
+      },
+      options,
+    );
+
+    if (typeof options.url !== 'string') {
+      throw new TypeError('Invalid websocket url provided!');
+    }
+
     /**
      * @type {?WebSocket}
      */
@@ -16,13 +30,18 @@ class BaseWebSocket {
     this.connectionManager = connectionManager;
 
     this.status = STATUS.IDLE;
-    this.url = `${options.url}/${options.path || 'adonis-ws'}`;
+    this.url = `${options.url}/${
+      typeof options.path === 'string'
+        ? options.path.replace(/^\//, '')
+        : 'adonis-ws'
+    }`;
 
+    this.connectionAttempts = 0;
     this.clientInterval = null;
     this.reconnectionTimeout = null;
 
     Object.defineProperties(this, {
-      inflate: { value: null, writable: true },
+      options: { value: options },
       ratelimit: {
         value: {
           time: 60e3,
@@ -41,6 +60,14 @@ class BaseWebSocket {
 
   emit(...args) {
     this.connectionManager.emit(...args);
+  }
+
+  error(error) {
+    this.emit(EVENTS.ERROR, error);
+  }
+
+  debug(debug) {
+    this.emit(EVENTS.DEBUG, debug);
   }
 
   _cleanupConnection() {
@@ -98,7 +125,7 @@ class BaseWebSocket {
     const error = event && event.error ? event.error : event;
 
     if (!error) return;
-    this.emit(EVENTS.ERROR, error);
+    this.error(error);
   }
 
   onMessage({ data }) {
