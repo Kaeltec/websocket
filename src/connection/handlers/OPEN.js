@@ -5,6 +5,7 @@ const { STATUS, EVENTS } = require('../../utils/Constants');
  */
 function handle(ws, { clientInterval }) {
   ws.status = STATUS.READY;
+  ws.connectionAttempts = 0;
   ws.clientInterval = setInterval(() => ws.ping(), clientInterval);
 
   for (const subscription of ws.subscriptions.values()) {

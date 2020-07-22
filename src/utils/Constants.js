@@ -24,8 +24,9 @@ module.exports.EVENTS = {
   JOIN: 'join',
   READY: 'ready',
   CLOSE: 'close',
-  ERROR: 'error',
   LEAVE: 'leave',
+  ERROR: 'error',
+  DEBUG: 'debug',
 
   JOIN_ERROR: 'joinError',
   LEAVE_ERROR: 'leaveError',
